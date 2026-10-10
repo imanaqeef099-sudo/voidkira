@@ -1,0 +1,575 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#08050b">
+<meta name="description" content="VOIDKIRA — Enter the world beyond darkness.">
+<title>VOIDKIRA — The Shadow King</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #08050b;
+  --red: #ff1744;
+  --purple: #a855f7;
+  --white: #f7efff;
+  --muted: #9b8ca7;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--white);
+  font-family: 'Rajdhani', sans-serif;
+  overflow-x: hidden;
+}
+body.loading { overflow: hidden; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; }
+
+/* CINEMATIC LOADER */
+#loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 20px;
+  background: #050307;
+  transition: opacity .8s, visibility .8s;
+}
+#loader.done { opacity: 0; visibility: hidden; }
+.loader-symbol {
+  font-size: 65px;
+  color: var(--red);
+  text-shadow: 0 0 20px var(--red), 0 0 65px #8b00ff;
+  animation: pulse 1s infinite alternate;
+}
+.loader-name {
+  font-family: Orbitron, sans-serif;
+  letter-spacing: 9px;
+  font-size: 20px;
+}
+.loader-track { width: 180px; height: 2px; background: #27182e; overflow: hidden; }
+.loader-bar {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg,var(--red),var(--purple));
+  transform-origin: left;
+  animation: load 1.8s ease-in-out forwards;
+}
+.loader-caption { font-size: 10px; letter-spacing: 4px; color: var(--muted); }
+
+/* BACKGROUND */
+.background {
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  background:
+    radial-gradient(ellipse at 75% 28%, #4b0d313b, transparent 36%),
+    radial-gradient(ellipse at 15% 75%, #5600a533, transparent 38%),
+    linear-gradient(145deg,#100811,#08050b 55%,#100612);
+}
+.background::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: .15;
+  background-image: linear-gradient(#a855f7 1px,transparent 1px),
+    linear-gradient(90deg,#a855f7 1px,transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(to bottom,black,transparent 85%);
+}
+.background::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse,transparent 25%,#08050bdc 100%);
+}
+#particles { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: #d9a5ff;
+  border-radius: 50%;
+  box-shadow: 0 0 9px #a855f7;
+  animation: floatUp linear infinite;
+}
+
+/* NAVIGATION */
+nav {
+  height: 76px;
+  max-width: 1180px;
+  margin: auto;
+  padding: 0 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #ffffff0c;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font: 800 17px Orbitron, sans-serif;
+  letter-spacing: 2px;
+}
+.brand-icon {
+  color: var(--red);
+  font-size: 26px;
+  text-shadow: 0 0 15px var(--red);
+}
+.nav-status {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: #d8b8e9;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #b44cff;
+  box-shadow: 0 0 12px #b44cff;
+}
+
+/* HERO */
+.hero {
+  min-height: 690px;
+  max-width: 1180px;
+  margin: auto;
+  padding: 65px 25px 90px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 25px;
+}
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 13px;
+  border: 1px solid #a855f746;
+  background: #8b21c414;
+  color: #d7a4ff;
+  font-size: 10px;
+  letter-spacing: 3px;
+  margin-bottom: 25px;
+}
+.eyebrow span { color: var(--red); }
+h1 {
+  font: 900 clamp(43px,6.6vw,86px)/1.05 Orbitron, sans-serif;
+  letter-spacing: -3px;
+  margin-bottom: 15px;
+}
+h1 .title-top { display: block; color: #fff; }
+h1 .title-bottom {
+  display: block;
+  color: transparent;
+  -webkit-text-stroke: 1px #c77cff;
+  text-shadow: 0 0 30px #9c32ff28;
+}
+.glitch { position: relative; }
+.glitch::after {
+  content: "VOIDKIRA";
+  position: absolute;
+  left: 0; top: 0;
+  color: var(--red);
+  opacity: 0;
+  animation: glitch 4s infinite;
+}
+.hero-description {
+  max-width: 420px;
+  color: #ad9bb9;
+  font-size: 17px;
+  line-height: 1.8;
+  margin: 24px 0;
+}
+.hero-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 22px;
+  font: 700 11px Orbitron, sans-serif;
+  letter-spacing: 1px;
+  border: 1px solid #a855f75e;
+  transition: .25s;
+  cursor: pointer;
+}
+.btn-primary {
+  background: linear-gradient(110deg,#b50c38,#6d12a6);
+  border-color: #f05bff65;
+  box-shadow: 0 0 24px #8d19be30;
+}
+.btn-secondary { background: #ffffff05; }
+.btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 25px #aa36ff55;
+  border-color: #d69cff;
+}
+.hero-meta {
+  display: flex;
+  gap: 23px;
+  margin-top: 38px;
+  flex-wrap: wrap;
+}
+.meta-item { border-left: 2px solid #a855f7; padding-left: 12px; }
+.meta-item strong { display: block; font: 700 13px Orbitron,sans-serif; }
+.meta-item small { color: var(--muted); font-size: 11px; }
+
+/* VILLAIN ART PANEL */
+.art-stage {
+  min-height: 490px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+}
+.art-halo {
+  position: absolute;
+  width: 290px;
+  height: 390px;
+  border-radius: 50%;
+  background: linear-gradient(180deg,#a300ff30,#ff174422);
+  filter: blur(55px);
+  animation: aura 4s ease-in-out infinite alternate;
+}
+.art-ring {
+  position: absolute;
+  width: 340px;
+  height: 340px;
+  border: 1px solid #bd63ff55;
+  border-radius: 50%;
+  box-shadow: inset 0 0 40px #8e21b61c,0 0 35px #7e23ad1c;
+  animation: rotate 24s linear infinite;
+}
+.art-ring::before,.art-ring::after {
+  content: "";
+  position: absolute;
+  width: 9px;height: 9px;
+  border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 0 20px var(--red);
+}
+.art-ring::before { top: 38px; left: 55px; }
+.art-ring::after { bottom: 45px; right: 30px; background: var(--purple); }
+.art-frame {
+  width: min(100%,390px);
+  aspect-ratio: 4/5;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #a855f75e;
+  background:
+    linear-gradient(180deg,#170a2380,#0b0610 100%),
+    radial-gradient(ellipse at 50% 25%,#7917a3,#110815 70%);
+  clip-path: polygon(0 0,100% 0,100% 91%,85% 100%,0 100%);
+}
+.art-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: .82;
+  mix-blend-mode: screen;
+}
+.art-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  background: radial-gradient(ellipse at 50% 30%,#511369,#0b0610 72%);
+}
+.mask {
+  font-size: 120px;
+  color: #d9b4ff;
+  filter: drop-shadow(0 0 20px #ad38ff);
+}
+.fallback-label {
+  font: 700 10px Orbitron,sans-serif;
+  letter-spacing: 4px;
+  color: #ff4777;
+}
+.art-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg,#08050b 0%,transparent 45%,#12071930 100%);
+  pointer-events: none;
+}
+.art-caption {
+  position: absolute;
+  bottom: 22px;left: 22px;right: 22px;
+  display: flex;justify-content: space-between;align-items: end;
+}
+.art-caption strong { font: 700 12px Orbitron,sans-serif; letter-spacing: 2px; }
+.art-caption small { color: #c0a5d1; font-size: 10px; }
+.corner {
+  position: absolute;
+  width: 22px;height: 22px;
+  border-color: var(--red);
+  border-style: solid;
+}
+.c1 { top: 12px;left: 12px;border-width: 1px 0 0 1px; }
+.c2 { top: 12px;right: 12px;border-width: 1px 1px 0 0; }
+.c3 { bottom: 12px;left: 12px;border-width: 0 0 1px 1px; }
+
+/* SECTIONS */
+.section {
+  max-width: 1180px;
+  margin: auto;
+  padding: 65px 25px;
+}
+.section-heading { text-align: center; margin-bottom: 35px; }
+.section-heading small {
+  color: #c47bff;
+  font: 11px Orbitron,sans-serif;
+  letter-spacing: 4px;
+}
+.section-heading h2 {
+  font: 800 clamp(23px,4vw,38px) Orbitron,sans-serif;
+  margin-top: 14px;
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 16px;
+}
+.card {
+  padding: 25px;
+  background: linear-gradient(145deg,#1c1024a8,#0d0911);
+  border: 1px solid #a855f72c;
+  transition: .3s;
+}
+.card:hover {
+  transform: translateY(-5px);
+  border-color: #a855f7a0;
+  box-shadow: 0 10px 40px #a855f710;
+}
+.card-icon { font-size: 28px; margin-bottom: 20px; }
+.card h3 { font: 700 13px Orbitron,sans-serif; margin-bottom: 12px; }
+.card p { font-size: 15px; color: var(--muted); line-height: 1.7; }
+.tag {
+  display: inline-block;
+  margin-top: 18px;
+  color: #d29aff;
+  font-size: 10px;
+  letter-spacing: 2px;
+}
+.cta {
+  text-align: center;
+  border: 1px solid #9b36c83b;
+  padding: 42px 20px;
+  background: radial-gradient(ellipse at top,#4c14502b,transparent 70%);
+}
+.cta h2 { font: 800 clamp(23px,5vw,40px) Orbitron,sans-serif; }
+.cta p { margin: 15px auto 25px; color: var(--muted); }
+footer {
+  max-width: 1180px;
+  margin: auto;
+  padding: 28px 25px;
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  flex-wrap: wrap;
+  border-top: 1px solid #ffffff10;
+  color: #76677e;
+  font-size: 12px;
+}
+footer strong { color: #d5b6e6; letter-spacing: 2px; }
+
+/* ANIMATIONS */
+@keyframes load { from {transform:scaleX(0)} to {transform:scaleX(1)} }
+@keyframes pulse { from {opacity:.6;transform:scale(.94)} to {opacity:1;transform:scale(1.06)} }
+@keyframes aura { from {transform:scale(.9);opacity:.5} to {transform:scale(1.12);opacity:1} }
+@keyframes rotate { to {transform:rotate(360deg)} }
+@keyframes floatUp {
+  from {transform:translateY(0);opacity:0}
+  15% {opacity:.9}
+  to {transform:translateY(-110vh);opacity:0}
+}
+@keyframes glitch {
+  0%,91%,100% {opacity:0;transform:none}
+  92% {opacity:.8;transform:translate(-4px,2px)}
+  94% {opacity:.7;transform:translate(4px,-1px)}
+  96% {opacity:0}
+}
+@media(max-width:760px) {
+  nav {height:65px;padding:0 20px}
+  .hero {
+    grid-template-columns:1fr;
+    padding:55px 22px 45px;
+    gap:15px;
+    min-height:auto;
+  }
+  h1 {letter-spacing:-2px}
+  .hero-description {font-size:16px}
+  .art-stage {min-height:420px;margin-top:10px}
+  .art-frame {width:min(83%,340px)}
+  .art-ring {width:280px;height:280px}
+  .art-halo {width:220px;height:300px}
+  .cards {grid-template-columns:1fr}
+  .section {padding:48px 22px}
+  .card {padding:22px}
+}
+@media(prefers-reduced-motion:reduce) {
+  *,*::before,*::after {
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    scroll-behavior:auto!important;
+  }
+}
+</style>
+</head>
+<body class="loading">
+
+<div id="loader">
+  <div class="loader-symbol">影</div>
+  <div class="loader-name">VOIDKIRA</div>
+  <div class="loader-track"><div class="loader-bar"></div></div>
+  <div class="loader-caption">AWAKENING THE SHADOW</div>
+</div>
+
+<div class="background"></div>
+<div id="particles"></div>
+
+<nav>
+  <a class="brand" href="#">
+    <span class="brand-icon">影</span> VOIDKIRA
+  </a>
+  <div class="nav-status"><span class="dot"></span> SHADOW SYSTEM</div>
+</nav>
+
+<main>
+  <section class="hero">
+    <div class="hero-content">
+      <div class="eyebrow"><span>✦</span> THE DARKNESS HAS A NAME</div>
+      <h1>
+        <span class="title-top">VOID</span>
+        <span class="title-bottom glitch">KIRA</span>
+      </h1>
+      <p class="hero-description">
+        Beyond the edge of reality lies a world ruled by shadows.
+        Enter the void. Discover your darker side.
+      </p>
+      <div class="hero-buttons">
+        <!-- GANTIKAN LINK DI BAWAH DENGAN LINK TELEGRAM KAU -->
+        <a class="btn btn-primary" href="https://t.me/" target="_blank" rel="noopener">
+          ◈ ENTER TELEGRAM ↗
+        </a>
+        <a class="btn btn-secondary" href="#archives">EXPLORE THE VOID ↓</a>
+      </div>
+      <div class="hero-meta">
+        <div class="meta-item"><strong>VOID / 001</strong><small>PROJECT ID</small></div>
+        <div class="meta-item"><strong>SHADOW</strong><small>THEME</small></div>
+        <div class="meta-item"><strong>∞</strong><small>BEYOND LIMITS</small></div>
+      </div>
+    </div>
+
+    <div class="art-stage">
+      <div class="art-halo"></div>
+      <div class="art-ring"></div>
+      <div class="art-frame">
+        <div class="art-fallback">
+          <div class="mask">☠</div>
+          <div class="fallback-label">THE SHADOW KING</div>
+        </div>
+        <!-- Pilihan: masukkan URL imej anime milik kau di sini -->
+        <img
+          src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=900&q=85"
+          alt="Dark atmospheric artwork"
+          onerror="this.style.display='none'"
+        >
+        <div class="art-overlay"></div>
+        <div class="corner c1"></div>
+        <div class="corner c2"></div>
+        <div class="corner c3"></div>
+        <div class="art-caption">
+          <div><strong>VOIDKIRA</strong><br><small>THE UNSEEN ENTITY</small></div>
+          <small>NO. 0001</small>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="archives">
+    <div class="section-heading">
+      <small>◈ CLASSIFIED ARCHIVES ◈</small>
+      <h2>INSIDE THE VOID</h2>
+    </div>
+    <div class="cards">
+      <article class="card">
+        <div class="card-icon">⛧</div>
+        <h3>THE SHADOW</h3>
+        <p>A dark aesthetic built around mystery, power and the unknown.</p>
+        <span class="tag">01 / IDENTITY</span>
+      </article>
+      <article class="card">
+        <div class="card-icon">⌘</div>
+        <h3>DIGITAL ARCHIVE</h3>
+        <p>A home for projects, tools, documentation and digital creations.</p>
+        <span class="tag">02 / PROJECTS</span>
+      </article>
+      <article class="card">
+        <div class="card-icon">◈</div>
+        <h3>JOIN THE VOID</h3>
+        <p>Follow the official channel for updates and new releases.</p>
+        <span class="tag">03 / COMMUNITY</span>
+      </article>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="cta">
+      <h2>DARE TO ENTER?</h2>
+      <p>The next chapter begins beyond the darkness.</p>
+      <a class="btn btn-primary" href="https://t.me/" target="_blank" rel="noopener">
+        JOIN THE SHADOW ↗
+      </a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <strong>VOIDKIRA © 2026</strong>
+  <span>BUILT BEYOND THE DARKNESS.</span>
+</footer>
+
+<script>
+/* CINEMATIC LOADER */
+window.addEventListener("load", () => {
+  setTimeout(() => {
+    document.getElementById("loader").classList.add("done");
+    document.body.classList.remove("loading");
+  }, 1900);
+});
+
+/* NEON PARTICLES */
+(() => {
+  const holder = document.getElementById("particles");
+  const count = window.innerWidth < 600 ? 22 : 45;
+
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement("span");
+    p.className = "particle";
+    p.style.left = Math.random() * 100 + "%";
+    p.style.top = Math.random() * 100 + "%";
+    p.style.animationDuration = (5 + Math.random() * 10) + "s";
+    p.style.animationDelay = (-Math.random() * 12) + "s";
+    p.style.opacity = (0.3 + Math.random() * 0.7);
+    holder.appendChild(p);
+  }
+})();
+</script>
+</body>
+</html>
