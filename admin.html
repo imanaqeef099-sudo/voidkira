@@ -1,0 +1,151 @@
+
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VOIDKIRA Admin</title>
+<style>
+:root{color-scheme:dark;--red:#ff1744;--purple:#8b5cf6}
+*{box-sizing:border-box}
+body{margin:0;background:#08060d;color:#f5f3ff;font-family:Arial,sans-serif;padding:20px}
+main{max-width:680px;margin:auto}
+h1{letter-spacing:4px;color:var(--red)}
+p{color:#aaa}
+.card{background:#15111e;border:1px solid #33243e;border-radius:15px;padding:18px;margin:16px 0}
+label{display:block;margin:14px 0 7px;color:#d8c8ef;font-size:14px}
+input,textarea{width:100%;padding:12px;border:1px solid #493552;border-radius:8px;background:#09070e;color:white}
+button{width:100%;padding:13px;border:0;border-radius:8px;margin-top:12px;font-weight:bold;background:linear-gradient(90deg,#ff1744,#8b5cf6);color:white}
+small{color:#aaa}
+#status{white-space:pre-wrap;overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+<main>
+<h1>VOIDKIRA</h1>
+<p>ADMIN CONTROL PANEL · CONTENT SETTINGS</p>
+
+<div class="card">
+<h3>🔐 Sambungan</h3>
+<label>Cloudflare Worker URL</label>
+<input id="worker" placeholder="https://nama-worker.nama-akaun.workers.dev">
+<label>Password admin</label>
+<input id="password" type="password" placeholder="Password admin">
+<button onclick="loadConfig()">LOAD FROM GITHUB</button>
+<small>URL Worker dan password hanya digunakan semasa sesi ini.</small>
+</div>
+
+<div class="card">
+<h3>🎨 Website Settings</h3>
+<label>Tajuk website</label>
+<input id="title">
+<label>Subtitle</label>
+<input id="subtitle">
+<label>Teks halaman pertama</label>
+<input id="page1Text">
+<label>Teks halaman kedua</label>
+<input id="page2Text">
+<label>Warna latar (HEX)</label>
+<input id="backgroundColor" placeholder="#08050f">
+<label>Warna utama (HEX)</label>
+<input id="primaryColor" placeholder="#ff003c">
+<label>Warna kedua (HEX)</label>
+<input id="secondaryColor" placeholder="#8b00ff">
+</div>
+
+<div class="card">
+<h3>🖼️ Media & Link</h3>
+<label>URL gambar logo (HTTPS)</label>
+<input id="logoImage" placeholder="https://...">
+<label>URL gambar latar (HTTPS)</label>
+<input id="backgroundImage" placeholder="https://...">
+<label>URL video (HTTPS)</label>
+<input id="videoUrl" placeholder="https://...mp4">
+<label>Telegram URL</label>
+<input id="telegramUrl" placeholder="https://t.me/...">
+<label>WhatsApp URL</label>
+<input id="supportUrl" placeholder="https://wa.me/...">
+<button onclick="publishConfig()">PUBLISH TO GITHUB</button>
+</div>
+
+<div class="card">
+<h3>📡 Status</h3>
+<p id="status">Belum disambungkan.</p>
+</div>
+</main>
+
+<script>
+const fields = [
+"title","subtitle","page1Text","page2Text",
+"backgroundColor","primaryColor","secondaryColor",
+"logoImage","backgroundImage","videoUrl",
+"telegramUrl","supportUrl"
+];
+
+function status(message){
+ document.getElementById("status").textContent=message;
+}
+
+function connection(){
+ const worker=document.getElementById("worker").value.trim().replace(/\/+$/,"");
+ const password=document.getElementById("password").value;
+ if(!worker.startsWith("https://")){
+  throw new Error("Masukkan URL HTTPS Cloudflare Worker yang betul.");
+ }
+ if(!password) throw new Error("Masukkan password admin.");
+ return {worker,password};
+}
+
+async function loadConfig(){
+ try{
+  const c=connection();
+  status("Sedang memuatkan tetapan...");
+  const response=await fetch(c.worker+"/config",{
+   headers:{"Authorization":"Bearer "+c.password}
+  });
+  if(!response.ok) throw new Error("Gagal memuatkan. Semak Worker dan password.");
+  const data=await response.json();
+  fields.forEach(key=>{
+   document.getElementById(key).value=data[key]||"";
+  });
+  status("Tetapan berjaya dimuatkan.");
+ }catch(e){status(e.message||"Sambungan gagal.");}
+}
+
+async function publishConfig(){
+ try{
+  const c=connection();
+  const data={};
+  fields.forEach(key=>{
+   data[key]=document.getElementById(key).value.trim();
+  });
+
+  for(const key of ["backgroundColor","primaryColor","secondaryColor"]){
+   if(data[key] && !/^#[0-9a-fA-F]{6}$/.test(data[key])){
+    throw new Error("Warna mesti dalam format HEX, contoh #ff003c.");
+   }
+  }
+
+  for(const key of ["logoImage","backgroundImage","videoUrl","telegramUrl","supportUrl"]){
+   if(data[key]){
+    const url=new URL(data[key]);
+    if(url.protocol!=="https:") throw new Error("Semua URL mesti menggunakan HTTPS.");
+   }
+  }
+
+  status("Sedang menerbitkan tetapan...");
+  const response=await fetch(c.worker+"/config",{
+   method:"PUT",
+   headers:{
+    "Content-Type":"application/json",
+    "Authorization":"Bearer "+c.password
+   },
+   body:JSON.stringify(data)
+  });
+  if(!response.ok) throw new Error("Gagal publish. Semak Worker dan password.");
+  status("Permintaan berjaya. Semak repository untuk pastikan perubahan disimpan.");
+ }catch(e){status(e.message||"Publish gagal.");}
+}
+</script>
+</body>
+</html>
